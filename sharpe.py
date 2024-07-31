@@ -2,43 +2,53 @@ import yfinance as yf
 import numpy as np
 import pandas as pd
 
+startDate = '2023-07-29'
+endDate = '2024-07-29'
 
-start_date = '2019-01-01'
-end_date = '2024-01-01'
+startDate = pd.to_datetime(startDate)
+endDate = pd.to_datetime(endDate)
 
-df = pd.read_csv('CAN_Risk_Free_Rates.csv')
-
+df = pd.read_csv('CAN_Risk_Free_Rates_Daily.csv')
 rates = df.set_index('Date')['Rate'].to_dict()
-
 df = pd.DataFrame(list(rates.items()), columns=['Date', 'Value'])
 
 df['Date'] = pd.to_datetime(df['Date'])
 
-date1 = '2024-07-20'
-date2 = '2024-07-30'
-
-date1 = pd.to_datetime(date1)
-date2 = pd.to_datetime(date2)
-
-filtered_df = df[(df['Date'] >= date1) & (df['Date'] <= date2)]
+filtered_df = df[(df['Date'] >= startDate) & (df['Date'] <= endDate)]
 
 filtered_dict = filtered_df.set_index('Date')['Value'].to_dict()
 
 print(filtered_dict)
 
+ticker = 'DOL.TO'  
 
-# data = yf.download("AAPL", start=start_date, end=end_date)
+# Download historical stock data
+stock_data = yf.download(ticker, start=startDate, end=endDate)
 
-# closing_prices = data['Close']
+# Ensure 'Date' is a column in the DataFrame and convert it to datetime if necessary
+stock_data.index.name = 'Date'
+stock_data.reset_index(inplace=True)
 
-# excessReturns = []
-# for i in range(len(closing_prices) - 1):
+# Create a dictionary with dates as keys and closing values as values
+stock_dict = stock_data.set_index('Date')['Close'].to_dict()
 
-#     excessReturns.append(((closing_prices[i + 1] - closing_prices[i])/closing_prices[i]) - riskFreeRate)
+excessReturns = []
+sorted_dates = sorted(stock_dict.keys())
 
-# sharpe_ratios["AAPL"] = np.mean(excessReturns) / np.std(excessReturns)
+for i in range(len(sorted_dates) - 1):
+    current_date = sorted_dates[i]
+    next_date = sorted_dates[i + 1]
+    
+    if next_date in stock_dict :
+        current_price = stock_dict[current_date]
+        next_price = stock_dict[next_date]
+        excess_return = (next_price - current_price) / current_price
+        print(excess_return)
+        excessReturns.append(excess_return - pow(filtered_dict.get(current_date),365))
+        print(pow(filtered_dict.get(current_date),12))
 
-# print(sharpe_ratios)
+sharpe = np.mean(excessReturns) / np.std(excessReturns)
+print(sharpe)
 
 
 

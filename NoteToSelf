@@ -1,0 +1,5 @@
+Having a daily risk free doesnt make sense. Becasue it does change day to day you are going to be getting yearly
+
+NEed to do rf^365
+
+Update: I cant do that because the risk free rate becomes so small as a number that it bascially doesnt even contribute to the return unfortuanlty.
