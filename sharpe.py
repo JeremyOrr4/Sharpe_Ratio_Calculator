@@ -57,7 +57,9 @@ def main():
         excess_returns.append(row['Yearly Return'] - current_year_risk_free_rate.iloc[0]['Value'])
 
 
-    print(excess_returns)
+    sharpe = dict()
+    sharpe[stocks[0]] = np.mean(excess_returns) / np.std(excess_returns)
+    print(sharpe)
 
 
 
