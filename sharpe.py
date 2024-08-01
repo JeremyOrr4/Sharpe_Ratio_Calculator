@@ -2,8 +2,8 @@ import yfinance as yf
 import numpy as np
 import pandas as pd
 
-START_DATE = pd.to_datetime("2022-01-01")
-END_DATE = pd.to_datetime("2023-01-01")
+START_DATE = pd.to_datetime("2018-01-01")
+END_DATE = pd.to_datetime("2024-01-01")
 RISK_FREE_RATE_FLAG = "YEARLY" # DAILY YEARLY
 
 def getRiskFreeRates():
@@ -18,6 +18,7 @@ def getRiskFreeRates():
     filtered_df = df[(df['Date'] >= START_DATE) & (df['Date'] <= END_DATE)]
     # filtered_dict = filtered_df.set_index('Date')['Value'].to_dict()
 
+    print(filtered_df)
     return filtered_df
 
 
@@ -31,6 +32,7 @@ def getYearlyStockReturns(ticker):
     yearly_prices = stock_data.groupby('Year')['Adj Close'].agg(['first', 'last'])
     yearly_prices['Yearly Return'] = (yearly_prices['last'] - yearly_prices['first']) / yearly_prices['first']
     
+    print(yearly_prices)
     return yearly_prices
 
 
@@ -42,23 +44,25 @@ def main():
     for line in stocks_file_lines:
         stocks.append(line.strip())
     stocks_file.close()
-    
-    returns_df = getYearlyStockReturns(stocks[0])
-    risk_free_rates_df = getRiskFreeRates()
-
-    excess_returns = []
-    for index, row in returns_df.iterrows():
-        
-        current_year = index
-
-        current_year_risk_free_rate = risk_free_rates_df[risk_free_rates_df['Date'].dt.year == current_year]
-
-
-        excess_returns.append(row['Yearly Return'] - current_year_risk_free_rate.iloc[0]['Value'])
-
 
     sharpe = dict()
-    sharpe[stocks[0]] = np.mean(excess_returns) / np.std(excess_returns)
+    for stock in stocks:
+        returns_df = getYearlyStockReturns(stock)
+        risk_free_rates_df = getRiskFreeRates()
+
+        excess_returns = []
+        for index, row in returns_df.iterrows():
+            
+            current_year = index
+
+            current_year_risk_free_rate = risk_free_rates_df[risk_free_rates_df['Date'].dt.year == current_year]
+
+
+            excess_returns.append(row['Yearly Return'] - current_year_risk_free_rate.iloc[0]['Value'])
+
+        
+        sharpe[stock] = np.mean(excess_returns) / np.std(excess_returns)
+    
     print(sharpe)
 
 
