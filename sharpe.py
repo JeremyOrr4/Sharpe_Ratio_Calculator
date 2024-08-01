@@ -2,9 +2,10 @@ import yfinance as yf
 import numpy as np
 import pandas as pd
 
-START_DATE = pd.to_datetime("2018-01-01")
+START_DATE = pd.to_datetime("2021-01-01")
 END_DATE = pd.to_datetime("2024-01-01")
 RISK_FREE_RATE_FLAG = "YEARLY" # DAILY YEARLY
+STOCKS_FILE = "CAN_Stocks.txt"
 
 def getRiskFreeRates():
     if RISK_FREE_RATE_FLAG == "YEARLY":
@@ -22,6 +23,13 @@ def getRiskFreeRates():
 
 
 def getYearlyStockReturns(ticker):
+    stock_data = yf.download(ticker)
+  
+    first_available_date = stock_data.index.min()
+
+    if START_DATE < first_available_date or stock_data.empty:
+       return pd.DataFrame()
+    
     stock_data = yf.download(ticker, start=START_DATE, end=END_DATE)
 
     stock_data.index.name = 'Date'
@@ -36,7 +44,7 @@ def getYearlyStockReturns(ticker):
 
 def main():
     stocks = []
-    stocks_file = open('Stocks.txt', 'r')
+    stocks_file = open(STOCKS_FILE, 'r')
     stocks_file_lines = stocks_file.readlines()
 
     for line in stocks_file_lines:
@@ -46,6 +54,10 @@ def main():
     sharpe = dict()
     for stock in stocks:
         returns_df = getYearlyStockReturns(stock)
+
+        if returns_df.empty:
+            continue
+
         risk_free_rates_df = getRiskFreeRates()
 
         excess_returns = []
@@ -61,41 +73,15 @@ def main():
         
         sharpe[stock] = np.mean(excess_returns) / np.std(excess_returns)
     
-    print(sharpe)
+    sorted_sharpe = sorted(sharpe.items(), key=lambda x: x[1], reverse=True)
+
+    with open('sharpe_ratios.txt', 'w') as f:
+        f.write(f"{START_DATE}: {END_DATE}\n")
+        for stock, ratio in sorted_sharpe:
+            f.write(f"{stock}: {ratio}\n")
 
 
 
 if __name__ == "__main__":
     main()
-
-# Download historical stock data
-
-# Ensure 'Date' is a column in the DataFrame and convert it to datetime if necessary
-# stock_data.index.name = 'Date'
-# stock_data.reset_index(inplace=True)
-
-# # Create a dictionary with dates as keys and closing values as values
-# stock_dict = stock_data.set_index('Date')['Close'].to_dict()
-
-# excessReturns = []
-# sorted_dates = sorted(stock_dict.keys())
-
-# for i in range(len(sorted_dates) - 1):
-#     current_date = sorted_dates[i]
-#     next_date = sorted_dates[i + 1]
-    
-#     if next_date in stock_dict :
-#         current_price = stock_dict[current_date]
-#         next_price = stock_dict[next_date]
-#         excess_return = (next_price - current_price) / current_price
-#         print(excess_return)
-#         excessReturns.append(excess_return - pow(filtered_dict.get(current_date),365))
-#         print(pow(filtered_dict.get(current_date),12))
-
-# sharpe = np.mean(excessReturns) / np.std(excessReturns)
-# print(sharpe)
-
-
-
-
 
