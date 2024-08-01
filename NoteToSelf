@@ -3,3 +3,6 @@ Having a daily risk free doesnt make sense. Becasue it does change day to day yo
 NEed to do rf^365
 
 Update: I cant do that because the risk free rate becomes so small as a number that it bascially doesnt even contribute to the return unfortuanlty.
+
+Trying new way
+Dataframe is a panda way of showing a table in python
