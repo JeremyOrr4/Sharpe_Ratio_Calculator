@@ -18,7 +18,6 @@ def getRiskFreeRates():
     filtered_df = df[(df['Date'] >= START_DATE) & (df['Date'] <= END_DATE)]
     # filtered_dict = filtered_df.set_index('Date')['Value'].to_dict()
 
-    print(filtered_df)
     return filtered_df
 
 
@@ -32,7 +31,6 @@ def getYearlyStockReturns(ticker):
     yearly_prices = stock_data.groupby('Year')['Adj Close'].agg(['first', 'last'])
     yearly_prices['Yearly Return'] = (yearly_prices['last'] - yearly_prices['first']) / yearly_prices['first']
     
-    print(yearly_prices)
     return yearly_prices
 
 

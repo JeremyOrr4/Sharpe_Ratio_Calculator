@@ -6,3 +6,6 @@ Update: I cant do that because the risk free rate becomes so small as a number t
 
 Trying new way
 Dataframe is a panda way of showing a table in python
+
+
+Next I need to vlaidate that there is data in my speciided start and end for stock
