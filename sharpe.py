@@ -2,16 +2,12 @@ import yfinance as yf
 import numpy as np
 import pandas as pd
 
-START_DATE = pd.to_datetime("2021-01-01")
+START_DATE = pd.to_datetime("2005-01-01")
 END_DATE = pd.to_datetime("2024-01-01")
-RISK_FREE_RATE_FLAG = "YEARLY" # DAILY YEARLY
 STOCKS_FILE = "CAN_Stocks.txt"
 
 def getRiskFreeRates():
-    if RISK_FREE_RATE_FLAG == "YEARLY":
-        df = pd.read_csv('Excel/CAN_Risk_Free_Rates_2000To2024_Yearly.csv')
-    elif RISK_FREE_RATE_FLAG == "DAILY":
-        df = pd.read_csv('Excel/CAN_Risk_Free_Rates_2000To2024_Daily.csv')
+    df = pd.read_csv('Excel/CAN_Risk_Free_Rates_2000To2024_Yearly.csv')
 
     rates = df.set_index('Date')['Rate'].to_dict()
     df = pd.DataFrame(list(rates.items()), columns=['Date', 'Value'])
@@ -67,10 +63,8 @@ def main():
 
             current_year_risk_free_rate = risk_free_rates_df[risk_free_rates_df['Date'].dt.year == current_year]
 
-
             excess_returns.append(row['Yearly Return'] - current_year_risk_free_rate.iloc[0]['Value'])
 
-        
         sharpe[stock] = np.mean(excess_returns) / np.std(excess_returns)
     
     sorted_sharpe = sorted(sharpe.items(), key=lambda x: x[1], reverse=True)
